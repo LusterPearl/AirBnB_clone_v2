@@ -38,66 +38,43 @@ def do_pack():
 
 
 def do_deploy(archive_path):
-    """
-    Distributes an archive to your web servers
-    """
-    if not os.path.exists(archive_path):
-        return False
+    """Deploys archive to webservers"""
+    if os.path.exists(archive_path):
+        try:
 
-    try:
-        """ Upload the archive to the /tmp/ directory of the web server """
-        put(archive_path, "/tmp/")
+            # Extract the filename without extension
+            fileName = os.path.splitext(os.path.basename(archive_path))[0]
 
-        """ Extract the archive to the folder """
-        archive_filename = archive_path.split("/")[-1].split(".")[0]
-        run("mkdir -p /data/web_static/releases/{}/".format(archive_filename))
-        run("tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/"
-            .format(archive_filename, archive_filename))
+            # Upload the archive to /tmp/ directory on the web server
+            put(archive_path, "/tmp/{}.tgz".format(fileName))
 
-        """ Delete the archive from the web server """
-        run("rm /tmp/{}.tgz".format(archive_filename))
+            # Create destination directory
+            destination = "/data/web_static/releases/{}".format(fileName)
+            run("mkdir -p {}".format(destination))
 
-        """ Move the contents to the proper location """
-        run("mv /data/web_static/releases/{}/web_static/* /data/web_static/releases/{}/"
-            .format(archive_filename, archive_filename))
+            # Extract the archive to the destination directory
+            run("tar -xzf /tmp/{}.tgz -C {}".format(fileName, destination))
 
-        """ Remove unnecessary directory """
-        run("rm -rf /data/web_static/releases/{}/web_static"
-            .format(archive_filename))
+            # Remove the archive from /tmp/
+            run("rm -rf /tmp/{}.tgz".format(fileName))
 
-        """ Delete the symbolic link /data/web_static/current from the web """
-        run("rm -rf /data/web_static/current")
+            # Remove the symbolic link /data/web_static/current
+            run("rm -rf /data/web_static/current")
 
-        # Create a new symbolic link
-        run("ln -s /data/web_static/releases/{}/ /data/web_static/current"
-            .format(archive_filename))
+            # Create a new symbolic link /data/web_static/current
+            run("ln -s {}/ /data/web_static/current".format(destination))
 
-        print("New version deployed!")
-
-        return True
-
-    except Exception as e:
+            return True
+        except Exception as e:
+            return False
+    else:
         return False
 
 
 def deploy():
-    """
-    Deploy the web static
-    """
-    """ Call do_pack() and store archive path """
-    archive_path = do_pack()
-
-    """ Return False if no archive has been created """
-    if archive_path is None:
+    ''' controls the deployment'''
+    archive = do_pack()
+    if archive is None:
         return False
-
-    """ Call do_deploy(archive_path) """
-    result = do_deploy(archive_path)
-
-    """ Return the result of do_deploy """
-    return result
-
-
-"""Run the deploy() function when script is executed"""
-if __name__ == "__main__":
-    deploy()
+    deployment = do_deploy(archive)
+    return deployment
