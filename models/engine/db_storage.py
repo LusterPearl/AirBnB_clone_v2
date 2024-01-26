@@ -15,6 +15,8 @@ from models.place import Place
 from models.review import Review
 from os import getenv
 
+Base = declarative_base()
+
 
 class DBStorage:
     """Database storage engine using SQLALchemy"""
@@ -34,6 +36,8 @@ class DBStorage:
 
         if getenv('HBNB_ENV') == 'test':
             Base.metadata.drop_all(self.__engine)
+
+        Bse.metadata.create_all(self.__engine)
 
     def all(self, cls=None):
         """Queries objects depending on the class name"""
@@ -63,7 +67,10 @@ class DBStorage:
 
     def reload(self):
         """creates all tbles in the database and creates a new session"""
-        Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(
-                           bind=self.__engine, expire_on_commit=False)
+            bind=self.__engine, expire_on_commit=False)
         self.__session = scoped_session(session_factory)()
+
+    def close(self):
+        """ closes the current database session"""
+        self.__session.close()

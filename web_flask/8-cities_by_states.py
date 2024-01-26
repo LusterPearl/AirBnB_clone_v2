@@ -2,8 +2,9 @@
 """
 start a Flask web application
 """
-from flask import Flask
-
+from flask import Flask, render_template
+from models import storage
+from models.state import State
 
 app = Flask(__name__)
 
@@ -43,6 +44,38 @@ def is_number(n):
 def number_template(n):
     """Display a html page only if n is an integer."""
     return render_template('5-number.html', n=n)
+
+
+@app.route('/number_odd_or_even/<int:n>', strict_slashes=False)
+def number_odd_or_even(n):
+    """Display a html page only if n is an integer indicating """
+    return render_template('6-number_odd_or_even.html', n=n)
+
+
+@app.teardown_appcontext
+def teardown(exception):
+    """Removes the current SQLALchemy Session """
+    storage.close()
+
+
+app.route('/states_list'. strict_slashes=False)
+
+
+def states_list():
+    """Displays a list of all state objects present in DBSstorage"""
+    states = storage.all(State).values()
+    states_sorted = sorted(states, key=lambda x: x.name)
+
+    return render_template('7-states_list.html', states=states_sorted)
+
+
+@app.route('/cities_by_states', strict_slashes=False)
+def cities_by_states():
+    """Displays a list of all state objects wwith their cities"""
+    states = storage.all(State).values()
+    states_sorted = sorted(states, key=lambda x: x.name)
+
+    return render_template('8-cities_by_states.html', states=states_sorted)
 
 
 if __name__ == '__main__':
