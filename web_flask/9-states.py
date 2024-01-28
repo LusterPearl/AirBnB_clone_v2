@@ -27,7 +27,7 @@ def c_is_fun(text):
     return 'C {}'.format(text.replace('_', ' '))
 
 
-@app.route('python/' deaults={'text': 'is cool'}, strict_slashes=False)
+@app.route('/python/', defaults={'text': 'is cool'}, strict_slashes=False)
 @app.route('/python/<text>', strict_slashes=False)
 def python_is_cool(text):
     """Display python is cool with the value of the text """
@@ -40,7 +40,7 @@ def is_number(n):
     return '{} is a number'.format(n)
 
 
-@app.route('/number_templates/int:n>', strict_slashes=False)
+@app.route('/number_templates/<int:n>', strict_slashes=False)
 def number_template(n):
     """Display a html page only if n is an integer."""
     return render_template('5-number.html', n=n)
@@ -58,9 +58,7 @@ def teardown(exception):
     storage.close()
 
 
-app.route('/states_list'. strict_slashes=False)
-
-
+@app.route('/states_list', strict_slashes=False)
 def states_list():
     """Displays a list of all state objects present in DBSstorage"""
     states = storage.all(State).values()
