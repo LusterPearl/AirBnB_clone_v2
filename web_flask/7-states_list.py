@@ -62,8 +62,8 @@ def teardown(exception):
 def states_list():
     """Displays a list of all state objects present in DBSstorage"""
     states = storage.all(State).values()
+    print("Number of states:", len(states))  # Add this line for debugging
     states_sorted = sorted(states, key=lambda x: x.name)
-
     return render_template('7-states_list.html', states=states_sorted)
 
 
